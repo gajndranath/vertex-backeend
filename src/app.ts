@@ -8,7 +8,11 @@ const app = express();
 // Security Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    'https://vertex-six-gray.vercel.app',
+    'http://localhost:3000'
+  ],
   credentials: true
 }));
 
