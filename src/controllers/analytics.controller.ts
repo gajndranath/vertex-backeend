@@ -28,12 +28,34 @@ export const trackEvent = async (req: Request, res: Response) => {
   }
 };
 
+import Admin from '../models/Admin.model';
+import Lead from '../models/Lead.model';
+import Blog from '../models/Blog.model';
+
 export const getAnalyticsDashboard = async (req: Request, res: Response) => {
   try {
-    // This will aggregate data for the admin dashboard later
-    const totalEvents = await AnalyticsEvent.countDocuments();
-    return res.status(200).json({ success: true, data: { totalEvents } });
+    const totalLeads = await Lead.countDocuments();
+    const totalBlogs = await Blog.countDocuments({ published: true });
+    const totalMembers = await Admin.countDocuments();
+    
+    // Active visitors: pageviews in the last 15 minutes
+    const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
+    const activeVisitors = await AnalyticsEvent.countDocuments({ 
+      type: 'pageview', 
+      createdAt: { $gte: fifteenMinsAgo } 
+    });
+
+    return res.status(200).json({ 
+      success: true, 
+      data: { 
+        totalLeads,
+        totalBlogs,
+        activeVisitors,
+        totalMembers
+      } 
+    });
   } catch (error) {
+    console.error('Dashboard Error:', error);
     return res.status(500).json({ success: false });
   }
 };
